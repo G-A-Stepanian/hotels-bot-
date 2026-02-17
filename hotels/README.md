@@ -1,4 +1,5 @@
 Telegram-бот для поиска отелей via Booking API.
+### К использованию планируется API apidojo-booking-v1.p.rapidapi.com
 
 ## Установка
 1. git clone ...
