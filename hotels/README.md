@@ -13,3 +13,10 @@ Telegram-бот для поиска отелей via Booking API.
 /bestdeal — оптимальные
 /history — история
 /help — справка
+
+🛠 Этапы разработки
+	• Этап 1: Базовый бот (/hello-world, Привет) +
+	• Этап 2: /lowprice (Booking API)
+	• Этап 3: /highprice
+	• Этап 4: /bestdeal + /history
+	• Финал: Inline-клавы, пагинация
