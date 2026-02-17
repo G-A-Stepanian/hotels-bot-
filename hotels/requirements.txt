@@ -3,3 +3,5 @@ peewee==3.17.7
 requests==2.32.3
 python-dotenv==1.0.1
 aiosqlite==0.19.0
+aiosqlite==0.19.0
+loguru==0.7.2

@@ -4,14 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb74578b-57e2-4176-a23e-225aee3c459d" name="Changes" comment="Это первая версия">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hotels/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hotels/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hotels/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hotels/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hotels/pyvenv.cfg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/hotels/requirements.txt" afterDir="false" />
+    <list default="true" id="cb74578b-57e2-4176-a23e-225aee3c459d" name="Changes" comment="Первый этап">
+      <change afterPath="$PROJECT_DIR$/hotels/logging_config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hotels/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/hotels/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hotels/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/hotels/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hotels/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/hotels/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hotels/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/hotels/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,7 +27,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="version_1" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -58,7 +56,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "version__2",
     "last_opened_file_path": "/Users/grigorystepanyan/PycharmProjects/SkillBox_projects/python_basic_diplom",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -102,7 +100,23 @@
       <option name="project" value="LOCAL" />
       <updated>1771239312526</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Базовая структура проекта">
+      <option name="closed" value="true" />
+      <created>1771305158980</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1771305158980</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Первый этап">
+      <option name="closed" value="true" />
+      <created>1771306832515</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1771306832515</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -111,6 +125,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Add lesson" />
     <MESSAGE value="Это первая версия" />
-    <option name="LAST_COMMIT_MESSAGE" value="Это первая версия" />
+    <MESSAGE value="Базовая структура проекта" />
+    <MESSAGE value="Первый этап" />
+    <option name="LAST_COMMIT_MESSAGE" value="Первый этап" />
   </component>
 </project>
