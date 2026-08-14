@@ -5,9 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb74578b-57e2-4176-a23e-225aee3c459d" name="Changes" comment="Первый этап">
-      <change afterPath="$PROJECT_DIR$/hotels/logging_config.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/.env.example" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/api/hotels.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/database/deduplicate_history.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/database/migrate_history.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/handlers/history.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/handlers/search.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/pyproject.toml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/pytest.ini" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/repositories/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/repositories/history.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/requirements-dev.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/tests/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/tests/test_history_repository.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/hotels/tests/test_search.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hotels/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/hotels/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hotels/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/hotels/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hotels/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/hotels/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hotels/database/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/hotels/database/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hotels/handlers/start.py" beforeDir="false" afterPath="$PROJECT_DIR$/hotels/handlers/start.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hotels/logging_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/hotels/logging_config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hotels/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/hotels/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hotels/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/hotels/requirements.txt" afterDir="false" />
     </list>
@@ -36,6 +54,65 @@
     <commands />
     <urls />
   </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.0" />
+      <entry key="MS500" value="1.0000000006282248" />
+      <entry key="S2" value="1.0050064372037508" />
+      <entry key="S5" value="1.1201742745858076" />
+      <entry key="S10" value="1.3466616139491185" />
+      <entry key="S30" value="1.702482082393439" />
+      <entry key="S60" value="1.8381420418959062" />
+      <entry key="M2" value="1.91550097864279" />
+      <entry key="M5" value="1.9653027093775708" />
+      <entry key="M10" value="1.9824981981548724" />
+      <entry key="M15" value="1.9882978298408855" />
+      <entry key="M30" value="1.9941316964273332" />
+      <entry key="H1" value="1.9970632736768326" />
+      <entry key="H2" value="2.004095836044268" />
+      <entry key="H4" value="2.3410847030872644" />
+      <entry key="D1" value="12.95827229128928" />
+      <entry key="W1" value="21.913841390196218" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="0.0" />
+      <entry key="S10" value="0.0" />
+      <entry key="S30" value="0.0" />
+      <entry key="S60" value="0.0" />
+      <entry key="M2" value="5.651057544339009E-206" />
+      <entry key="M5" value="7.958879373346714E-83" />
+      <entry key="M10" value="8.923622824496639E-42" />
+      <entry key="M15" value="4.3192397403115915E-28" />
+      <entry key="M30" value="2.2072878727954855E-14" />
+      <entry key="H1" value="1.8052255040059623E-7" />
+      <entry key="H2" value="5.705640407555804E-4" />
+      <entry key="H4" value="0.03330343971444142" />
+      <entry key="D1" value="1.0086120473694464" />
+      <entry key="W1" value="1.8135770045325188" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="4.1059395276060257E-4" />
+      <entry key="MS500" value="0.21022410385204493" />
+      <entry key="S2" value="0.6796206030950654" />
+      <entry key="S5" value="0.9465187128365635" />
+      <entry key="S10" value="1.2265193462644157" />
+      <entry key="S30" value="1.6449150613349985" />
+      <entry key="S60" value="1.8059729020326698" />
+      <entry key="M2" value="1.8984456395710205" />
+      <entry key="M5" value="1.9582297873432029" />
+      <entry key="M10" value="1.978918370178383" />
+      <entry key="M15" value="1.9859015213209075" />
+      <entry key="M30" value="1.992928633727146" />
+      <entry key="H1" value="1.99646068998874" />
+      <entry key="H2" value="2.0043645947338855" />
+      <entry key="H4" value="2.3742336245623004" />
+      <entry key="D1" value="13.966839858886596" />
+      <entry key="W1" value="23.727409785592833" />
+    </decayedShown>
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -44,28 +121,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.database.executor": "Run",
-    "Python.hotels.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.middleware.executor": "Run",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "git-widget-placeholder": "version__2",
-    "last_opened_file_path": "/Users/grigorystepanyan/PycharmProjects/SkillBox_projects/python_basic_diplom",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.black.configuration.BlackFormatterConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.database.executor&quot;: &quot;Run&quot;,
+    &quot;Python.hotels.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.middleware.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/grigorystepanyan/PycharmProjects/SkillBox_projects/python_basic_diplom&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.black.configuration.BlackFormatterConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
@@ -79,7 +157,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-ca5e2b39c7df-6e1f45a539f7-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.29346.308" />
+        <option value="bundled-python-sdk-245168a56dbd-c2ffad84badb-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.25134.203" />
       </set>
     </attachedChunks>
   </component>

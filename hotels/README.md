@@ -2,10 +2,30 @@ Telegram-бот для поиска отелей via Booking API.
 ### К использованию планируется API apidojo-booking-v1.p.rapidapi.com
 
 ## Установка
-1. git clone ...
-2. pip install -r requirements.txt - устанавливаем библиотеки
-3. Создайте .env: BOT_TOKEN=..., RAPIDAPI_KEY=... #Прописываем доступы
-4. python main.py и запускаем
+
+1. Клонируйте репозиторий.
+2. Создайте виртуальное окружение:
+
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+3. Установите зависимости:  
+
+   ```bash
+   python -m pip install -r requirements.txt
+
+4. Создайте локальный файл настроек
+
+   ```bash
+   cp .env.example .env
+
+5. Заполните в .env значения BOT_TOKEN и RAPIDAPI_KEY.
+6. Запустите бота
+
+   ```bash
+   python main.py
+
+
 
 ## Планируемые команды
 /lowprice — дешевые отели

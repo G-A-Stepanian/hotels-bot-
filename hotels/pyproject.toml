@@ -1,0 +1,9 @@
+[tool.ruff]
+exclude = [
+    "_legacy_v9",
+    ".venv",
+    "venv",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "BLE", "DTZ", "SIM", "EXE"]
