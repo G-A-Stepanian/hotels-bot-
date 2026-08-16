@@ -9,7 +9,13 @@ from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import Message
+from aiogram.types import (
+    CallbackQuery,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Message,
+)
+from aiogram_calendar import SimpleCalendar, SimpleCalendarCallback, get_user_locale
 from loguru import logger
 
 from api.hotels import (
@@ -32,6 +38,7 @@ class SearchStates(StatesGroup):
     price_min = State()
     price_max = State()
     limit = State()
+    viewing = State()
 
 
 MONTENEGRO_TZ = ZoneInfo("Europe/Podgorica")
@@ -42,9 +49,22 @@ COMMAND_TITLES = {
     "bestdeal": "⚖️ Отели в диапазоне цены",
 }
 
+CALENDAR_MAX_DATE = datetime(2027, 12, 31)
+
+
+# ---------------------------------------------------------------------------
+# Утилиты
+# ---------------------------------------------------------------------------
+
+
+def _to_dt(d: date | datetime) -> datetime:
+    """Конвертирует date → datetime(00:00:00). datetime оставляет как есть."""
+    if isinstance(d, datetime):
+        return d
+    return datetime(d.year, d.month, d.day)
+
 
 def parse_date(value: str) -> date | None:
-    """Разбирает дату формата YYYY-MM-DD."""
     try:
         return date.fromisoformat(value)
     except ValueError:
@@ -52,7 +72,6 @@ def parse_date(value: str) -> date | None:
 
 
 def extract_hotel_name(hotel: dict[str, Any]) -> str:
-    """Извлекает название из нескольких вариантов API-ответа."""
     return str(
         hotel.get("name")
         or hotel.get("hotelName")
@@ -62,7 +81,6 @@ def extract_hotel_name(hotel: dict[str, Any]) -> str:
 
 
 def extract_address(hotel: dict[str, Any]) -> str:
-    """Извлекает адрес из распространённых вариантов ответа API."""
     address = hotel.get("address") or hotel.get("addressLine")
 
     if isinstance(address, str) and address.strip():
@@ -91,11 +109,7 @@ def extract_address(hotel: dict[str, Any]) -> str:
     return "не указан"
 
 
-def format_hotel(
-    index: int,
-    hotel: dict[str, Any],
-) -> str:
-    """Формирует компактную карточку отеля."""
+def format_hotel(index: int, hotel: dict[str, Any]) -> str:
     name = extract_hotel_name(hotel)
     rates = hotel_rates_info(hotel)
 
@@ -106,25 +120,61 @@ def format_hotel(
     address = extract_address(hotel)
     booking_url = hotel_booking_url(hotel) or "ссылка недоступна"
 
-    safe_name = escape(name)
-    safe_price = escape(price_text)
-    safe_address = escape(address)
-    safe_url = escape(booking_url)
-
     return (
-        f"<b>{index}. {safe_name}</b>\n"
-        f"💰 Цена: {safe_price}\n"
-        f"📍 Адрес: {safe_address}\n"
-        f"🔗 {safe_url}"
+        f"<b>{index}. {escape(name)}</b>\n"
+        f"💰 Цена: {escape(price_text)}\n"
+        f"📍 Адрес: {escape(address)}\n"
+        f"🔗 {escape(booking_url)}"
     )
 
 
-async def start_search(
+def pagination_keyboard(page: int, total: int) -> InlineKeyboardMarkup:
+    nav_buttons: list[InlineKeyboardButton] = []
+
+    if page > 0:
+        nav_buttons.append(
+            InlineKeyboardButton(text="◀️ Назад", callback_data=f"page:{page - 1}")
+        )
+    if page < total - 1:
+        nav_buttons.append(
+            InlineKeyboardButton(text="Вперёд ▶️", callback_data=f"page:{page + 1}")
+        )
+
+    action_buttons = [
+        InlineKeyboardButton(text="🔁 Новый поиск", callback_data="new_search")
+    ]
+
+    return InlineKeyboardMarkup(inline_keyboard=[nav_buttons, action_buttons])
+
+
+async def send_hotel_page(
     message: Message,
     state: FSMContext,
-    command: str,
+    page: int,
 ) -> None:
-    """Запускает последовательный сценарий поиска."""
+    data = await state.get_data()
+    hotels: list[dict[str, Any]] = data["hotels"]
+    total = len(hotels)
+
+    text = format_hotel(page + 1, hotels[page])
+    text += f"\n\n<i>Отель {page + 1} из {total}</i>"
+
+    await message.answer(
+        text,
+        parse_mode="HTML",
+        disable_web_page_preview=True,
+        reply_markup=pagination_keyboard(page, total),
+    )
+    await state.update_data(current_page=page)
+    await state.set_state(SearchStates.viewing)
+
+
+# ---------------------------------------------------------------------------
+# Запуск сценария
+# ---------------------------------------------------------------------------
+
+
+async def start_search(message: Message, state: FSMContext, command: str) -> None:
     try:
         validate_rapidapi_settings()
     except RuntimeError as error:
@@ -143,25 +193,21 @@ async def start_search(
 
 @router.message(Command("lowprice"))
 async def lowprice_command(message: Message, state: FSMContext) -> None:
-    """Запускает поиск дешёвых отелей."""
     await start_search(message, state, "lowprice")
 
 
 @router.message(Command("highprice"))
 async def highprice_command(message: Message, state: FSMContext) -> None:
-    """Запускает поиск дорогих отелей."""
     await start_search(message, state, "highprice")
 
 
 @router.message(Command("bestdeal"))
 async def bestdeal_command(message: Message, state: FSMContext) -> None:
-    """Запускает поиск отелей в диапазоне цены."""
     await start_search(message, state, "bestdeal")
 
 
 @router.message(Command("cancel"))
 async def cancel_command(message: Message, state: FSMContext) -> None:
-    """Отменяет незавершённый поиск."""
     current_state = await state.get_state()
     await state.clear()
 
@@ -172,9 +218,13 @@ async def cancel_command(message: Message, state: FSMContext) -> None:
     await message.answer("Поиск отменён.")
 
 
+# ---------------------------------------------------------------------------
+# Шаг 1 — город
+# ---------------------------------------------------------------------------
+
+
 @router.message(SearchStates.city, F.text)
 async def city_step(message: Message, state: FSMContext) -> None:
-    """Принимает город."""
     city = (message.text or "").strip()
 
     if len(city) < 2:
@@ -183,76 +233,131 @@ async def city_step(message: Message, state: FSMContext) -> None:
 
     await state.update_data(city=city)
     await state.set_state(SearchStates.checkin)
+
+    now_dt = _to_dt(datetime.now(MONTENEGRO_TZ).replace(tzinfo=None))
+
+    calendar = SimpleCalendar(
+        locale=await get_user_locale(message.from_user), show_alerts=True
+    )
+    calendar.set_dates_range(now_dt, CALENDAR_MAX_DATE)
     await message.answer(
-        "Введите дату заезда в формате <code>YYYY-MM-DD</code>, например "
-        "<code>2026-09-10</code>.",
-        parse_mode="HTML",
+        "📅 Выберите дату заезда:",
+        reply_markup=await calendar.start_calendar(),
     )
 
 
-@router.message(SearchStates.checkin, F.text)
-async def checkin_step(message: Message, state: FSMContext) -> None:
-    """Принимает и проверяет дату заезда."""
-    checkin = (message.text or "").strip()
-    checkin_date = parse_date(checkin)
+# ---------------------------------------------------------------------------
+# Шаг 2 — дата заезда (календарь)
+# ---------------------------------------------------------------------------
 
-    if checkin_date is None:
-        await message.answer("Неверный формат. Введите дату как YYYY-MM-DD:")
+
+@router.callback_query(SearchStates.checkin, SimpleCalendarCallback.filter())
+async def checkin_calendar_callback(
+    callback: CallbackQuery,
+    callback_data: SimpleCalendarCallback,
+    state: FSMContext,
+) -> None:
+    now_dt = _to_dt(datetime.now(MONTENEGRO_TZ).replace(tzinfo=None))
+
+    calendar = SimpleCalendar(
+        locale=await get_user_locale(callback.from_user), show_alerts=True
+    )
+    calendar.set_dates_range(now_dt, CALENDAR_MAX_DATE)
+    selected, selected_date = await calendar.process_selection(callback, callback_data)
+
+    if not selected:
         return
 
-    if checkin_date < datetime.now(MONTENEGRO_TZ).date():
-        await message.answer("Дата заезда не может быть в прошлом. Введите другую:")
-        return
-
-    await state.update_data(checkin=checkin)
+    selected_dt = _to_dt(selected_date)
+    checkin_str = selected_dt.strftime("%Y-%m-%d")
+    await state.update_data(checkin=checkin_str)
     await state.set_state(SearchStates.checkout)
-    await message.answer(
-        "Введите дату выезда в формате <code>YYYY-MM-DD</code>.",
-        parse_mode="HTML",
+
+    checkout_calendar = SimpleCalendar(
+        locale=await get_user_locale(callback.from_user), show_alerts=True
+    )
+    checkout_min = datetime(selected_dt.year, selected_dt.month, selected_dt.day + 1)
+    checkout_calendar.set_dates_range(checkout_min, CALENDAR_MAX_DATE)
+
+    # ИСПРАВЛЕНИЕ :284 — InaccessibleMessage не имеет .answer()
+    if not isinstance(callback.message, Message):
+        await callback.answer()
+        return
+
+    await callback.message.answer(f"✅ Заезд: <b>{checkin_str}</b>", parse_mode="HTML")
+    await callback.answer()
+    await callback.message.answer(
+        "📅 Выберите дату выезда:",
+        reply_markup=await checkout_calendar.start_calendar(),
     )
 
 
-@router.message(SearchStates.checkout, F.text)
-async def checkout_step(message: Message, state: FSMContext) -> None:
-    """Принимает и проверяет дату выезда."""
-    checkout = (message.text or "").strip()
-    checkout_date = parse_date(checkout)
+# ---------------------------------------------------------------------------
+# Шаг 3 — дата выезда (календарь)
+# ---------------------------------------------------------------------------
 
-    if checkout_date is None:
-        await message.answer("Неверный формат. Введите дату как YYYY-MM-DD:")
-        return
 
+@router.callback_query(SearchStates.checkout, SimpleCalendarCallback.filter())
+async def checkout_calendar_callback(
+    callback: CallbackQuery,
+    callback_data: SimpleCalendarCallback,
+    state: FSMContext,
+) -> None:
     data = await state.get_data()
-    checkin_date = parse_date(str(data["checkin"]))
+    # ИСПРАВЛЕНИЕ :307 — parse_date может вернуть None, явный fallback
+    parsed = parse_date(str(data["checkin"]))
+    checkin_dt = _to_dt(parsed if parsed is not None else date.today())
 
-    if checkin_date is None:
-        await state.clear()
-        await message.answer("Не удалось прочитать дату заезда. Начните поиск заново.")
+    calendar = SimpleCalendar(
+        locale=await get_user_locale(callback.from_user), show_alerts=True
+    )
+    checkout_min = datetime(checkin_dt.year, checkin_dt.month, checkin_dt.day + 1)
+    calendar.set_dates_range(checkout_min, CALENDAR_MAX_DATE)
+
+    selected, selected_date = await calendar.process_selection(callback, callback_data)
+
+    if not selected:
         return
 
-    if checkout_date <= checkin_date:
-        await message.answer(
-            "Дата выезда должна быть позже даты заезда. Введите другую:"
+    selected_dt = _to_dt(selected_date)
+
+    if selected_dt <= checkin_dt:
+        await callback.answer(
+            "⚠️ Дата выезда должна быть позже даты заезда!", show_alert=True
         )
         return
 
-    await state.update_data(checkout=checkout)
+    checkout_str = selected_dt.strftime("%Y-%m-%d")
+    await state.update_data(checkout=checkout_str)
+
+    # ИСПРАВЛЕНИЕ :333/:338/:344 — проверяем тип перед .answer()
+    if not isinstance(callback.message, Message):
+        await callback.answer()
+        return
+
+    await callback.message.answer(f"✅ Выезд: <b>{checkout_str}</b>", parse_mode="HTML")
+    await callback.answer()
 
     if data["command"] == "bestdeal":
         await state.set_state(SearchStates.price_min)
-        await message.answer(
+        await callback.message.answer(
             "Введите минимальную цену за ночь в USD, например: <code>50</code>.",
             parse_mode="HTML",
         )
-        return
+    else:
+        await state.set_state(SearchStates.limit)
+        await callback.message.answer(
+            "Сколько отелей показать? Введите число от 1 до 10:"
+        )
 
-    await state.set_state(SearchStates.limit)
-    await message.answer("Сколько отелей показать? Введите число от 1 до 10:")
+
+# ---------------------------------------------------------------------------
+# Шаг 4 — цены (только для bestdeal)
+# ---------------------------------------------------------------------------
 
 
 @router.message(SearchStates.price_min, F.text)
 async def price_min_step(message: Message, state: FSMContext) -> None:
-    """Принимает нижнюю границу цены."""
     raw_price = (message.text or "").strip().replace(",", ".")
 
     try:
@@ -275,7 +380,6 @@ async def price_min_step(message: Message, state: FSMContext) -> None:
 
 @router.message(SearchStates.price_max, F.text)
 async def price_max_step(message: Message, state: FSMContext) -> None:
-    """Принимает верхнюю границу цены."""
     raw_price = (message.text or "").strip().replace(",", ".")
 
     if raw_price in {"-", "—", ""}:
@@ -302,9 +406,13 @@ async def price_max_step(message: Message, state: FSMContext) -> None:
     await message.answer("Сколько отелей показать? Введите число от 1 до 10:")
 
 
+# ---------------------------------------------------------------------------
+# Шаг 5 — лимит и API-запрос
+# ---------------------------------------------------------------------------
+
+
 @router.message(SearchStates.limit, F.text)
 async def limit_step(message: Message, state: FSMContext) -> None:
-    """Выполняет API-запрос, выводит и сохраняет результаты."""
     raw_limit = (message.text or "").strip()
 
     try:
@@ -326,11 +434,14 @@ async def limit_step(message: Message, state: FSMContext) -> None:
     city = str(data["city"])
     checkin = str(data["checkin"])
     checkout = str(data["checkout"])
-
-    price_min = float(data["price_min"]) if "price_min" in data else None
-    price_max = float(data["price_max"]) if data.get("price_max") is not None else None
+    price_min: float | None = float(data["price_min"]) if "price_min" in data else None
+    price_max: float | None = (
+        float(data["price_max"]) if data.get("price_max") is not None else None
+    )
 
     await message.answer("🔎 Ищу отели, это может занять несколько секунд…")
+
+    hotels: list[dict[str, Any]] = []
 
     try:
         if command == "lowprice":
@@ -339,44 +450,41 @@ async def limit_step(message: Message, state: FSMContext) -> None:
         elif command == "highprice":
             hotels = await search_highprice(city, checkin, checkout, limit=limit)
 
-        else:
+        else:  # bestdeal
             pool_size = 100 if price_max is not None else 50
+            hotels = await search_lowprice(city, checkin, checkout, limit=pool_size)
+            # ИСПРАВЛЕНИЕ :454/:457 — min_price может быть None, фильтруем безопасно
+            filtered: list[dict[str, Any]] = []
+            for h in hotels:
+                raw_price = hotel_rates_info(h).get("min_price")
+                if raw_price is None:
+                    continue
+                h_price = float(raw_price)
+                if price_min is not None and h_price < price_min:
+                    continue
+                if price_max is not None and h_price > price_max:
+                    continue
+                filtered.append(h)
+            hotels = filtered[:limit]
 
-            hotels = await search_lowprice(
-                city,
-                checkin,
-                checkout,
-                limit=pool_size,
-            )
-
-            hotels = [
-                hotel
-                for hotel in hotels
-                if (
-                    hotel_rates_info(hotel).get("min_price") is not None
-                    and float(hotel_rates_info(hotel)["min_price"]) >= price_min
-                    and (
-                        price_max is None
-                        or float(hotel_rates_info(hotel)["min_price"]) <= price_max
-                    )
-                )
-            ][:limit]
     except (HotelsApiError, ValueError) as error:
         logger.warning("Ошибка поиска: {}", error)
+        await state.clear()
         await message.answer(
             "Не удалось получить результаты. Проверьте город, даты и настройки API."
         )
         return
+
     except Exception:  # noqa: BLE001
         logger.exception("Непредвиденная ошибка поиска")
+        await state.clear()
         await message.answer(
             "Во время поиска произошла ошибка. Повторите попытку позже."
         )
         return
-    finally:
-        await state.clear()
 
     if not hotels:
+        await state.clear()
         await message.answer("По этим параметрам отели не найдены.")
         return
 
@@ -394,11 +502,43 @@ async def limit_step(message: Message, state: FSMContext) -> None:
     except Exception:  # noqa: BLE001
         logger.exception("Не удалось сохранить историю поиска")
 
-    await message.answer(
-        f"✅ Найдено отелей: {len(hotels)}\n\n"
-        + "\n\n".join(
-            format_hotel(index, hotel) for index, hotel in enumerate(hotels, start=1)
-        ),
-        parse_mode="HTML",
-        disable_web_page_preview=True,
+    await state.update_data(hotels=hotels)
+    await message.answer(f"✅ Найдено отелей: {len(hotels)}")
+    await send_hotel_page(message, state, page=0)
+
+
+# ---------------------------------------------------------------------------
+# Пагинация результатов
+# ---------------------------------------------------------------------------
+
+
+@router.callback_query(SearchStates.viewing, F.data.startswith("page:"))
+async def paginate_callback(callback: CallbackQuery, state: FSMContext) -> None:
+    # ИСПРАВЛЕНИЕ :509/:512/:513 — проверяем что message именно Message
+    if not isinstance(callback.message, Message):
+        await callback.answer()
+        return
+
+    page = int(callback.data.split(":")[1])  # type: ignore[union-attr]
+    await callback.message.delete()
+    await send_hotel_page(callback.message, state, page)
+    await callback.answer()
+
+
+@router.callback_query(SearchStates.viewing, F.data == "new_search")
+async def new_search_callback(callback: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
+
+    # ИСПРАВЛЕНИЕ :523 — проверяем тип перед .delete()
+    if not isinstance(callback.message, Message):
+        await callback.answer()
+        return
+
+    await callback.message.delete()
+    await callback.message.answer(
+        "Выберите команду для нового поиска:\n"
+        "/lowprice — дешёвые отели\n"
+        "/highprice — дорогие отели\n"
+        "/bestdeal — в диапазоне цены"
     )
+    await callback.answer()

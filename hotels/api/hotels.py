@@ -37,9 +37,9 @@ from config import RAPIDAPI_HOST, RAPIDAPI_KEY
 BASE_URL = f"https://{RAPIDAPI_HOST}"
 
 # Заголовки RapidAPI: ключ и хост обязателен для доступа к endpoint.
-HEADERS = {
-    "X-RapidAPI-Key": RAPIDAPI_KEY,
-    "X-RapidAPI-Host": RAPIDAPI_HOST,
+HEADERS: dict[str, str] = {
+    "X-RapidAPI-Key": RAPIDAPI_KEY or "",
+    "X-RapidAPI-Host": RAPIDAPI_HOST or "",
 }
 
 # Пути (endpoints) для текущего RapidAPI хоста.
