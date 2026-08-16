@@ -1,4 +1,3 @@
-cat > ~/PycharmProjects/SkillBox_projects/python_basic_diplom/.github/workflows/ci.yml << 'EOF'
 name: CI
 
 on:
@@ -45,4 +44,3 @@ jobs:
       - name: pip-audit (security)
         run: pip-audit
         continue-on-error: true
-EOF
