@@ -12,6 +12,7 @@ from database.models import SearchHistory, User, db
 from handlers.history import router as history_router
 from handlers.search import router as search_router
 from handlers.start import router as start_router
+from aiogram.types import BotCommand
 
 
 async def main() -> None:
@@ -30,6 +31,19 @@ async def main() -> None:
         logger.info("База данных инициализирована")
 
         bot = Bot(token=BOT_TOKEN)
+
+        await bot.set_my_commands(
+            [
+                BotCommand(command="start", description="Главное меню"),
+                BotCommand(command="lowprice", description="Дешёвые отели"),
+                BotCommand(command="highprice", description="Дорогие отели"),
+                BotCommand(command="bestdeal", description="По диапазону цены"),
+                BotCommand(command="history", description="История поиска"),
+                BotCommand(command="cancel", description="Отменить поиск"),
+                BotCommand(command="help", description="Справка"),
+            ]
+        )
+
         dispatcher = Dispatcher()
         dispatcher.include_router(start_router)
         dispatcher.include_router(history_router)
@@ -56,4 +70,7 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        pass  # Ctrl+C — нормальная остановка, трейсбек не нужен
